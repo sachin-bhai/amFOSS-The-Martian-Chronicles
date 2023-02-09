@@ -5,7 +5,7 @@ from PIL import Image
 from PyQt5 import QtCore,QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QWidget, QFileDialog, QGraphicsScene, QGraphicsView
 from PyQt5.QtGui import QPixmap
-
+import threading
 
 
 class MainWindow(QMainWindow):
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
 
         
         self.button1 = QPushButton("DOWNLOAD")
-        self.button1.clicked.connect(self.button1_clicked)
+        self.button1.clicked.connect(self.download_thread)
         self.button2 = QPushButton("FETCH")
         self.button2.clicked.connect(self.change1_image)
         self.button3 = QPushButton("PREV")
@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
         self.button4 = QPushButton("NEXT")
         self.button4.clicked.connect(self.change3_image)
         self.button5 = QPushButton("SEND MAIL")
-        self.button5.clicked.connect(self.button5_clicked)
+        self.button5.clicked.connect(self.mail_thread)
        
         
         button_layout = QHBoxLayout()
@@ -149,6 +149,8 @@ class MainWindow(QMainWindow):
         files=os.listdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
         global n_max
         n_max=len(files)
+
+
     def change1_image(self):
         
         image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/eminem.jpg')
@@ -190,6 +192,15 @@ class MainWindow(QMainWindow):
         for i in sending:
             ezgmail.send(str(i),"Rover Images","These are the images I retrieved today...",attach)
         print('Done')
+
+
+    def download_thread(self) :
+        thread = threading.Thread(target=self.button1_clicked)
+        thread.start()
+
+    def mail_thread(self):
+        thread = threading.Thread(target=self.button5_clicked)
+        thread.start()
 
    
 
