@@ -1,9 +1,9 @@
 
 
-import sys,requests,json,os,ezgmail
+import sys,requests,json,os,ezgmail,random
 from PIL import Image
 from PyQt5 import QtCore,QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QWidget, QFileDialog, QGraphicsScene, QGraphicsView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView,QMessageBox
 from PyQt5.QtGui import QPixmap
 import threading
 
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
 
 
         
-        image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/loading.jpg')
+        image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/eminem.jpg')
         image_label.setPixmap(image)
 
 
@@ -116,6 +116,9 @@ class MainWindow(QMainWindow):
 
         
         self.setCentralWidget(central_widget)
+    
+    counting = 0
+    maximum=0
     def button1_clicked(self):
         # print('Hello World')
         rover_name=(self.text1_input.text()).lower()
@@ -123,67 +126,75 @@ class MainWindow(QMainWindow):
         date_text = self.date_input.text()
         print(date_text)
         os.makedirs('rover_images',exist_ok=True)
-        res=requests.get('https://api.nasa.gov/mars-photos/api/v1/rovers/'+rover_name+'/photos?sol='+date_text+'&camera='+camera_name+'&api_key=qWngT2sHFzb7K2WW9Kwzor1xs7w10rkDu6LDXfNX')
-        res.raise_for_status()
-        rover_data=json.loads(res.text)
+        try:
+            res=requests.get('https://api.nasa.gov/mars-photos/api/v1/rovers/'+rover_name+'/photos?sol='+date_text+'&camera='+camera_name+'&api_key=qWngT2sHFzb7K2WW9Kwzor1xs7w10rkDu6LDXfNX')
+            res.raise_for_status()
+            
+            if res.status_code != requests.codes.ok:
+                warning = QMessageBox.warning(self, "Warning", "Please check your Parameters Again")
+            else:
+                pass 
 
-        images=rover_data['photos']
+            rover_data=json.loads(res.text)
 
-        sources=[]
-        for i in images:
-            for j in i:
-                if j=='img_src':
-                    sources.append(i[j])
+            images=rover_data['photos']
 
-        print(sources)
-        global n
-        n=0
-        if len(sources)==0:
-            print("bruh")
+            sources=[]
+            for i in images:
+                for j in i:
+                    if j=='img_src':
+                        sources.append(i[j])
 
-        for x in sources:
-            img=Image.open(requests.get(x,stream=True).raw)
-            os.chdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
-            img.save(f'attachments{n}.jpg')
-            n+=1
-        files=os.listdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
-        global n_max
-        n_max=len(files)
+            print(sources)
+            if len(sources)==0:
+                warning = QMessageBox.warning(self, "Warning", "No images found for the said date")
+                
+
+            for x in sources:
+                img=Image.open(requests.get(x,stream=True).raw)
+                os.chdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
+                img.save(f'attachments{n}.jpg')
+                n+=1
+        except requests.exceptions.HTTPError:
+            warning = QMessageBox.warning(self, "Warning", "Please check your Parameters Again")
 
 
+    
     def change1_image(self):
-        
-        image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/eminem.jpg')
+        listing=os.listdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
+        item=random.choice(listing)
+        image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/'+item)
         image_label.setPixmap(image)
-        print('Bruh')
+        # print('Bruh')
         global counting
         counting=0
         print(counting)
-    def change2_image(self,counting):
-        counting=0
+    def change2_image(self):
+        global counting
+        counting-=1
         def something(self,counting):
-                    image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/attachments'+str(counting)+'.jpg')
-                    image_label.setPixmap(image)
-                    counting-=1
-                    print(counting)
+                image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/attachments'+str(counting)+'.jpg')
+                image_label.setPixmap(image)
+                print(counting)
         
         something(self,counting)
-        counting+=1
+
 
         # os.chdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
         # directory=r'/home/programmer/The-Martian-Chronicles/rover_images'
 
 
-    def change3_image(self,counting):
-        counting=1
-        def something(self,counting):
+    def change3_image(self):
+        global counting
+        counting+=1
+        def something2(self,counting):
                 image = QtGui.QPixmap(r'/home/programmer/The-Martian-Chronicles/rover_images/attachments'+str(counting)+'.jpg')
                 image_label.setPixmap(image)
                 counting+=1
                 print(counting)
         
-        something(self,counting)
-        counting+=1
+        something2(self,counting)
+    
     def button5_clicked(self):
         attach=os.listdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
         os.chdir(r'/home/programmer/The-Martian-Chronicles/rover_images')
